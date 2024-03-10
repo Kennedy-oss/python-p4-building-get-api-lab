@@ -19,20 +19,30 @@ def index():
     return '<h1>Bakery GET API</h1>'
 
 @app.route('/bakeries')
-def bakeries():
-    return ''
+def get_bakeries():
+    bakeries = Bakery.query.all()
+    return jsonify([bakery.to_dict() for bakery in bakeries])
 
 @app.route('/bakeries/<int:id>')
-def bakery_by_id(id):
-    return ''
+def get_bakery_by_id(id):
+    bakery = db.session.get(Bakery, id)
+    if bakery:
+        return jsonify(bakery.to_dict(rules=('-baked_goods.bakery',)))
+    else:
+        return jsonify({"error": "Bakery not found"}), 404
 
 @app.route('/baked_goods/by_price')
-def baked_goods_by_price():
-    return ''
+def get_baked_goods_by_price():
+    goods = BakedGood.query.order_by(BakedGood.price.desc()).all()
+    return jsonify([good.to_dict() for good in goods])
 
 @app.route('/baked_goods/most_expensive')
-def most_expensive_baked_good():
-    return ''
+def get_most_expensive_baked_good():
+    most_expensive_good = BakedGood.query.order_by(BakedGood.price.desc()).first()
+    if most_expensive_good:
+        return jsonify(most_expensive_good.to_dict())
+    else:
+        return jsonify({"error": "No baked goods found"}), 404
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
